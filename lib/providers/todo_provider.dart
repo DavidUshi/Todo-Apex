@@ -11,8 +11,6 @@ class TodoProvider extends ChangeNotifier {
 
   List<Todo> get todos => List.unmodifiable(_todos);
 
-  
-
   Future<void> init() async {
     if (_initialized) return;
     final prefs = await SharedPreferences.getInstance();
@@ -31,7 +29,6 @@ class TodoProvider extends ChangeNotifier {
     _initialized = true;
     notifyListeners();
   }
-  
 
   Future<void> _saveToDisk() async {
     final prefs = await SharedPreferences.getInstance();
@@ -39,9 +36,18 @@ class TodoProvider extends ChangeNotifier {
     await prefs.setString(_storageKey, json.encode(arr));
   }
 
-  Future<void> addTodo({required String title, String? note}) async {
+  Future<void> addTodo({
+    required String title,
+    String? note,
+    DateTime? date,
+  }) async {
     final id = const Uuid().v4();
-    final todo = Todo(id: id, title: title, note: note);
+    final todo = Todo(
+      id: id,
+      title: title,
+      note: note,
+      createdAt: date ?? DateTime.now(),
+    );
     _todos.insert(0, todo);
     await _saveToDisk();
     notifyListeners();

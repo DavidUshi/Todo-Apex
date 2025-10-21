@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/screens/todo_detail_screen.dart';
 import 'package:flutter_application_2/services/auth_service.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -14,7 +15,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  DateTime? selectedDate; // null = show all
+  DateTime? selectedDate;
 
   void _pickDate() async {
     final now = DateTime.now();
@@ -39,7 +40,11 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) {
         final isEditing = todo != null;
         return AlertDialog(
-          title: Text(isEditing ? 'Edit Todo' : 'Add Todo'),
+          title: Text(
+            isEditing
+                ? 'Edit Todo'
+                : 'Add Todo for ${selectedDate != null ? DateFormat('MMM d, yyy').format(selectedDate!) : 'Today'}',
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -85,6 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   await provider.addTodo(
                     title: title,
                     note: note.isEmpty ? null : note,
+                    date: selectedDate ?? DateTime.now(),
                   );
                   ScaffoldMessenger.of(
                     context,
@@ -257,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 : ListView.builder(
                     padding: const EdgeInsets.all(8),
                     itemCount: todos.length,
-                    itemBuilder: (context, i) {
+                    itemBuilder: (ctx, i) {
                       final todo = todos[i];
                       return Dismissible(
                         key: ValueKey(todo.id),
@@ -303,6 +309,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Card(
                           margin: const EdgeInsets.symmetric(vertical: 6),
                           child: ListTile(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => TodoDetailScreen(todo: todo),
+                                ),
+                              );
+                            },
                             leading: Checkbox(
                               activeColor: Colors.deepOrange,
                               value: todo.done,
@@ -317,12 +331,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                     : null,
                               ),
                             ),
-                            subtitle: todo.note == null
-                                ? null
-                                : Text(
-                                    '${todo.note!}\nCreated: ${DateFormat('MMM d, yyyy').format(todo.createdAt)}',
-                                    style: const TextStyle(fontSize: 12),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (todo.note != null && todo.note!.isNotEmpty)
+                                  Text(
+                                    todo.note ?? '',
+                                    style: TextStyle(fontSize: 12),
                                   ),
+
+                                SizedBox(width: 5),
+
+                                Text(
+                                  'Created at: ${DateFormat('MMM d, yyy').format(todo.createdAt)}',
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            ),
                             trailing: PopupMenuButton<String>(
                               icon: const Icon(
                                 Icons.more_vert,
@@ -406,7 +431,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.deepOrange,
         onPressed: () => _showAddEditDialog(context),
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.add_task, color: Colors.white),
       ),
     );
   }

@@ -1,3 +1,16 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // AGP version required by your office setup
+        classpath("com.android.tools.build:gradle:8.6.0")
+        // Optional: Kotlin Gradle plugin (if not applied in app/build.gradle.kts)
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.10")
+    }
+}
+
 allprojects {
     repositories {
         google()
@@ -15,6 +28,7 @@ subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
+
 subprojects {
     project.evaluationDependsOn(":app")
 }
